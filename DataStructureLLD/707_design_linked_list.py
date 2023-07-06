@@ -1,77 +1,74 @@
 '''
 Problem: https://leetcode.com/problems/design-linked-list/
 '''
-class Node:
+class ListNode:
     
-    def __init__(self, data):
-        self.data = data
-        self.next = None
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
 
 class MyLinkedList:
 
     def __init__(self):
         self.head = None
+        self.size = 0
 
     def get(self, index: int) -> int:
-        node_at_index = self.head
-        if self.head == None:
+        if index < 0 or index >= self.size:
             return -1
-        elif index < 0:
-            return -1
-        else:
-            while index > 0 and node_at_index.next != None:
-                node_at_index = node_at_index.next
-                index -= 1
-            if index != 0:
-                return -1
-            else:  
-                return node_at_index.data
+
+        curr = self.head
+        for _ in range(index):
+            curr = curr.next
+
+        return curr.val
         
-
-
     def addAtHead(self, val: int) -> None:
-        temp = self.head
-        self.head = Node(val)
-        self.head.next = temp
+        newNode = ListNode(val)
+        newNode.next = self.head
+        self.head = newNode
+        self.size += 1
 
     def addAtTail(self, val: int) -> None:
-        node_at_tail = self.head
-        while node_at_tail.next != None:
-            node_at_tail = node_at_tail.next
-        node_at_tail.next = Node(val)
+        newNode = ListNode(val)
+        if not self.head:
+            self.head = newNode
+        else:
+            curr = self.head
+            while curr.next:
+                curr = curr.next
+            curr.next = newNode
+        self.size += 1
 
     def addAtIndex(self, index: int, val: int) -> None:
-        node_at_index = self.head
-        node_at_prev_index = None
-        if index >= 0:
-            while index > 0 and node_at_index.next != None:
-                node_at_prev_index = node_at_index
-                node_at_index = node_at_index.next
-                index -= 1
-            if index <= 1:
-                node_at_prev_index.next = Node(val)
-                node_at_prev_index.next.next = node_at_index
-            else:
-                return None
+        if index > self.size:
+            return
+        if index <= 0:
+            self.addAtHead(val)
+        elif index == self.size:
+            self.addAtTail(val)
         else:
-            return None
+            newNode = ListNode(val)
+            curr = self.head
+            for _ in range(index - 1):
+                curr = curr.next
+            newNode.next = curr.next
+            curr.next = newNode
+            self.size += 1
 
     def deleteAtIndex(self, index: int) -> None:
-        node_at_index = self.head
-        if index >=0:
-            node_at_prev_index = None
-            while index > 0 and node_at_index.next != None:
-                node_at_prev_index = node_at_index
-                node_at_index = node_at_index.next
-                index -= 1
-            if index != 0:
-                return None
-            elif node_at_prev_index == None:
-                self.head = self.head.next
-            else:  
-                node_at_prev_index.next = node_at_index.next
+        if index < 0 or index >= self.size:
+            return
+
+        if index == 0:
+            self.head = self.head.next
         else:
-            return None
+            curr = self.head
+            for _ in range(index - 1):
+                curr = curr.next
+            curr.next = curr.next.next
+
+        self.size -= 1
 
 '''
 Test Cases:
