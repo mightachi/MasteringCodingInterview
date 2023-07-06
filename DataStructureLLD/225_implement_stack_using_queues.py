@@ -1,5 +1,5 @@
 """
-https://leetcode.com/problems/design-a-stack-with-increment-operation/
+https://leetcode.com/problems/implement-stack-using-queues/
 """
 
 from collections import deque
