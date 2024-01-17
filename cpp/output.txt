@@ -1,0 +1,3 @@
+Enter a string: You entered: I
+
+Enter another string: You entered: am
