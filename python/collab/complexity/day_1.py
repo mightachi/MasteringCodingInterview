@@ -29,13 +29,20 @@ def permute(string, l, r):
         print(string)
     else:
         for i in range(l, r + 1):
+            print(f"Inside permute: i: {i}, l: {l}, r: {r}")
             string = swap(string, l, i)
+            print(f"Inside permute: string: {string}")
+            print(f"Calling permute with new l: {l+1}, r: {r}")
             permute(string, l + 1, r)
+            print(f"Backtracking where i: {i}, l: {l}, r: {r}")
             string = swap(string, l, i)  # backtrack
-
+            print(f"Inside permute: string: {string}")
 def swap(string, i, j):
+    print(f"Inside swap: i: {i}, j: {j}")
     char_list = list(string)
+    print(f"Inside swap before swap: char_list: {char_list}")
     char_list[i], char_list[j] = char_list[j], char_list[i]
+    print(f"Inside swap after swap: char_list: {char_list}")
     return ''.join(char_list)
 
 # Example usage
