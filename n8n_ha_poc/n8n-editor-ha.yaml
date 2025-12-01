@@ -1,0 +1,241 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: n8n-secret
+  namespace: n8n-ha
+type: Opaque
+stringData:
+  N8N_BASIC_AUTH_USER: admin
+  N8N_BASIC_AUTH_PASSWORD: admin123
+  N8N_ENCRYPTION_KEY: n8n-encryption-key-for-ha-poc-minimum-32-chars
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: n8n-editor
+  namespace: n8n-ha
+  labels:
+    app: n8n-editor
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: n8n-editor
+  template:
+    metadata:
+      labels:
+        app: n8n-editor
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5678"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: n8n
+        image: n8nio/n8n:latest
+        ports:
+        - containerPort: 5678
+        env:
+        - name: DB_TYPE
+          value: postgresdb
+        - name: DB_POSTGRESDB_HOST
+          value: postgresql-ha
+        - name: DB_POSTGRESDB_PORT
+          value: "5432"
+        - name: DB_POSTGRESDB_DATABASE
+          value: n8n
+        - name: DB_POSTGRESDB_USER
+          value: postgres
+        - name: DB_POSTGRESDB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-secret
+              key: postgres-password
+        - name: QUEUE_BULL_REDIS_HOST
+          value: redis-master
+        - name: QUEUE_BULL_REDIS_PORT
+          value: "6379"
+        - name: EXECUTIONS_MODE
+          value: queue
+        - name: N8N_BASIC_AUTH_ACTIVE
+          value: "true"
+        - name: N8N_BASIC_AUTH_USER
+          valueFrom:
+            secretKeyRef:
+              name: n8n-secret
+              key: N8N_BASIC_AUTH_USER
+        - name: N8N_BASIC_AUTH_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: n8n-secret
+              key: N8N_BASIC_AUTH_PASSWORD
+        - name: N8N_METRICS
+          value: "true"
+        - name: N8N_LOG_LEVEL
+          value: info
+        - name: N8N_ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: n8n-secret
+              key: N8N_ENCRYPTION_KEY
+        # Database connection retry settings
+        - name: DB_POSTGRESDB_CONNECTION_TIMEOUT
+          value: "30000"
+        - name: DB_POSTGRESDB_POOL_SIZE
+          value: "10"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 5678
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 5678
+          initialDelaySeconds: 45
+          periodSeconds: 5
+          timeoutSeconds: 5
+          failureThreshold: 6
+          successThreshold: 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: n8n-worker
+  namespace: n8n-ha
+  labels:
+    app: n8n-worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: n8n-worker
+  template:
+    metadata:
+      labels:
+        app: n8n-worker
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5678"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: n8n
+        image: n8nio/n8n:latest
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          n8n worker
+        env:
+        - name: DB_TYPE
+          value: postgresdb
+        - name: DB_POSTGRESDB_HOST
+          value: postgresql-ha
+        - name: DB_POSTGRESDB_PORT
+          value: "5432"
+        - name: DB_POSTGRESDB_DATABASE
+          value: n8n
+        - name: DB_POSTGRESDB_USER
+          value: postgres
+        - name: DB_POSTGRESDB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-secret
+              key: postgres-password
+        - name: QUEUE_BULL_REDIS_HOST
+          value: redis-master
+        - name: QUEUE_BULL_REDIS_PORT
+          value: "6379"
+        - name: EXECUTIONS_MODE
+          value: queue
+        - name: N8N_METRICS
+          value: "true"
+        - name: N8N_LOG_LEVEL
+          value: info
+        - name: N8N_ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: n8n-secret
+              key: N8N_ENCRYPTION_KEY
+        # Database connection retry settings
+        - name: DB_POSTGRESDB_CONNECTION_TIMEOUT
+          value: "30000"
+        - name: DB_POSTGRESDB_POOL_SIZE
+          value: "10"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - pgrep -f "n8n worker" || exit 1
+          initialDelaySeconds: 60
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - pgrep -f "n8n worker" || exit 1
+          initialDelaySeconds: 45
+          periodSeconds: 5
+          failureThreshold: 6
+          successThreshold: 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: n8n-editor
+  namespace: n8n-ha
+  labels:
+    app: n8n-editor
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5678
+    targetPort: 5678
+  selector:
+    app: n8n-editor
+  # Sticky sessions: Route same client IP to same pod for 3 hours
+  # This ensures user sessions persist during workflow editing
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800  # 3 hours
+---
+# Optional: LoadBalancer service for external access
+# Uncomment and use this if you want external access via LoadBalancer
+# For local testing, ClusterIP + port-forward is sufficient
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: n8n-editor-lb
+#   namespace: n8n-ha
+#   labels:
+#     app: n8n-editor
+# spec:
+#   type: LoadBalancer
+#   ports:
+#   - port: 80
+#     targetPort: 5678
+#   selector:
+#     app: n8n-editor
+#   sessionAffinity: ClientIP
+#   sessionAffinityConfig:
+#     clientIP:
+#       timeoutSeconds: 10800
