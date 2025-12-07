@@ -1,0 +1,8 @@
+# BigQuery Job Labels POC - Python Dependencies
+
+# Google Cloud BigQuery client library
+google-cloud-bigquery>=3.0.0
+
+# Optional: For better error handling and type hints
+typing-extensions>=4.0.0
+
