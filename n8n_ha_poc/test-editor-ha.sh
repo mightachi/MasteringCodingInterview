@@ -342,12 +342,12 @@ verify_workflow() {
     local auth_success=false
     
     while [ $auth_attempt -lt $max_auth_attempts ] && [ "$auth_success" = false ]; do
-        # Always get a fresh cookie to ensure authentication
+    # Always get a fresh cookie to ensure authentication
         rm -f /tmp/n8n_cookies.txt
-        local login_result=$(curl -s -c /tmp/n8n_cookies.txt -X POST \
-            "${N8N_URL}/rest/login" \
-            -H "Content-Type: application/json" \
-            -d "{\"emailOrLdapLoginId\":\"${N8N_USER}\",\"password\":\"${N8N_PASS}\"}" 2>/dev/null)
+    local login_result=$(curl -s -c /tmp/n8n_cookies.txt -X POST \
+        "${N8N_URL}/rest/login" \
+        -H "Content-Type: application/json" \
+        -d "{\"emailOrLdapLoginId\":\"${N8N_USER}\",\"password\":\"${N8N_PASS}\"}" 2>/dev/null)
         
         # Verify login was successful - check multiple possible response formats
         if echo "$login_result" | grep -q "\"data\"" || \
@@ -583,19 +583,19 @@ if [ "$SKIP_WORKFLOW_TESTS" = "false" ] && [ -n "$WORKFLOW_ID" ] && [ "$WORKFLOW
             SKIP_WORKFLOW_TESTS=true
         fi
     else
-        # Clean up any stale cookies
-        rm -f /tmp/n8n_cookies.txt
-        
+    # Clean up any stale cookies
+    rm -f /tmp/n8n_cookies.txt
+    
         # Retry verification up to 3 times with increasing delays
         verify_attempt=0
         max_verify_attempts=3
         verify_success=false
         
         while [ $verify_attempt -lt $max_verify_attempts ] && [ "$verify_success" = false ]; do
-            if verify_workflow "$WORKFLOW_ID"; then
-                echo "✓ Workflow persistence test PASSED: Workflow survived pod failure"
+    if verify_workflow "$WORKFLOW_ID"; then
+        echo "✓ Workflow persistence test PASSED: Workflow survived pod failure"
                 verify_success=true
-            else
+    else
                 verify_attempt=$((verify_attempt + 1))
                 if [ $verify_attempt -lt $max_verify_attempts ]; then
                     echo "  Verification attempt $verify_attempt failed, retrying in 5 seconds..."

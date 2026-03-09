@@ -1,0 +1,22 @@
+# Ensemble Learning Project - Production-grade dependencies (pinned for reproducibility)
+# Python 3.9+
+
+# Core ML
+numpy>=1.24.0,<2.0.0
+scikit-learn>=1.3.0,<2.0.0
+pandas>=2.0.0,<3.0.0
+
+# Optional: uncomment for XGBoost in ensemble
+# xgboost>=2.0.0,<3.0.0
+
+# API and server
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.0.0
+
+# Config and packaging
+pyyaml>=6.0
+joblib>=1.3.0
+
+# Observability (optional)
+# prometheus-client>=0.19.0

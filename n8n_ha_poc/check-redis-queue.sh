@@ -128,3 +128,6 @@ echo "  kubectl exec -n $NAMESPACE $REDIS_POD -- redis-cli FLUSHALL"
 echo ""
 
 
+
+
+

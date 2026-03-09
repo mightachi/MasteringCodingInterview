@@ -1,0 +1,17 @@
+{
+  "version": "1.0.0",
+  "artifact_name": "ensemble_pipeline",
+  "dataset_version": null,
+  "metrics": {
+    "val_accuracy": 0.9473684210526315,
+    "val_precision": 0.9459459459459459,
+    "val_recall": 0.9722222222222222,
+    "val_f1": 0.958904109589041,
+    "val_roc_auc": 0.9880952380952381,
+    "test_accuracy": 0.9385964912280702,
+    "test_precision": 0.9710144927536232,
+    "test_recall": 0.9305555555555556,
+    "test_f1": 0.950354609929078,
+    "test_roc_auc": 0.9920634920634921
+  }
+}

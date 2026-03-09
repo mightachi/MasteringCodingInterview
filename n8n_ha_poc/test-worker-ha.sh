@@ -244,7 +244,7 @@ get_auth_cookie() {
         # Check if response contains "data" array or "count" (successful API response)
         if [ -n "$test_response" ] && (echo "$test_response" | grep -q "\"data\"" || echo "$test_response" | grep -q "\"count\""); then
             echo "✓ Authentication successful (login cookie)"
-            return 0
+        return 0
         fi
     fi
     
@@ -398,9 +398,9 @@ trigger_workflow_execution() {
         else
             # Last resort: basic auth
             response=$(curl -s -w "\n%{http_code}" -u "${N8N_USER}:${N8N_PASS}" -X POST \
-                "${N8N_URL}/rest/workflows/${workflow_id}/execute" \
-                -H "Content-Type: application/json" \
-                -d "{}" 2>/dev/null)
+            "${N8N_URL}/rest/workflows/${workflow_id}/execute" \
+            -H "Content-Type: application/json" \
+            -d "{}" 2>/dev/null)
             http_code=$(echo "$response" | tail -1)
             response=$(echo "$response" | sed '$d')
         fi
@@ -506,12 +506,12 @@ check_execution_status() {
         else
             # Fallback: get fresh cookie
             get_auth_cookie > /dev/null 2>&1
-            if [ -f /tmp/n8n_cookies.txt ]; then
-                response=$(curl -s -b /tmp/n8n_cookies.txt \
-                    "${N8N_URL}/rest/executions/${execution_id}" 2>/dev/null)
-            else
-                response=$(curl -s -u "${N8N_USER}:${N8N_PASS}" \
-                    "${N8N_URL}/rest/executions/${execution_id}" 2>/dev/null)
+        if [ -f /tmp/n8n_cookies.txt ]; then
+            response=$(curl -s -b /tmp/n8n_cookies.txt \
+                "${N8N_URL}/rest/executions/${execution_id}" 2>/dev/null)
+        else
+            response=$(curl -s -u "${N8N_USER}:${N8N_PASS}" \
+                "${N8N_URL}/rest/executions/${execution_id}" 2>/dev/null)
             fi
         fi
         
@@ -979,7 +979,7 @@ if [ "$SKIP_EXECUTION_TESTS" = "false" ] && [ -n "$EXECUTION_ID" ]; then
     fi
     
     if [ "$SKIP_EXECUTION_TESTS" = "false" ]; then
-        check_execution_status "$EXECUTION_ID"
+    check_execution_status "$EXECUTION_ID"
     fi
     echo ""
     

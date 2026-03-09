@@ -1,0 +1,27 @@
+# Configuration for training and serving (12-factor: can override with env)
+project:
+  name: ensemble_churn
+  version: "1.0.0"
+
+data:
+  # Use "sklearn_dataset" for in-memory demo, or path to CSV
+  source: sklearn_dataset
+  # source: data/raw/train.csv
+  test_size: 0.2
+  val_size: 0.1
+  random_state: 42
+
+model:
+  output_dir: models
+  artifact_name: ensemble_pipeline
+  # Ensemble weights / params can be extended here
+  ensemble:
+    voting: soft
+    n_estimators_rf: 100
+    max_depth_rf: 10
+    max_depth_gb: 5
+    n_estimators_gb: 100
+
+server:
+  host: "0.0.0.0"
+  port: 8000

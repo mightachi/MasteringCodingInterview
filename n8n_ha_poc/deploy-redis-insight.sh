@@ -208,3 +208,6 @@ echo "  kubectl delete deployment,svc redisinsight -n $NAMESPACE"
 echo ""
 
 
+
+
+
