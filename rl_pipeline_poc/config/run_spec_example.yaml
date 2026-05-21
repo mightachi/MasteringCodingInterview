@@ -1,0 +1,57 @@
+# VELA RunSpec example: training pipeline for one segment
+# Use this to drive training/inference with no code changes
+
+project_id: orion_b2b
+segment_id: domestic_high
+pipeline_type: training
+
+data:
+  source_type: local
+  query_or_path: ""   # empty = synthetic data for POC
+  run_date: "2026-03-10"
+  lookback_days: 28
+  filters: {}
+
+features:
+  numeric_features:
+    - f1
+    - f2
+    - f3
+    - revenue
+    - prev_delta
+  categorical_features: []
+  scale: true
+  missing_strategy: median
+
+actions:
+  type: discrete
+  buckets: [-0.5, -0.25, 0.0, 0.25, 0.5]
+  labels: ["decrease_high", "decrease_low", "hold", "increase_low", "increase_high"]
+
+reward:
+  template: revenue_growth
+  weights:
+    revenue: 0.7
+    stability: 0.3
+  normalize: true
+
+training:
+  algorithm: A2C
+  total_timesteps: 50000
+  learning_rate: 0.0003
+  n_steps: 5
+  ent_coef: 0.01
+  vf_coef: 0.5
+  gamma: 0.99
+
+evaluation:
+  min_reward_per_episode: null
+  max_reward_std: null
+  max_sign_flip_rate: null
+  max_avg_delta: null
+
+guardrails:
+  min_delta: -0.5
+  max_delta: 0.5
+
+output_table_or_path: null

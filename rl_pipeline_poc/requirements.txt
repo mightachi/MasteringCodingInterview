@@ -1,0 +1,15 @@
+# VELA POC - minimal for runnable pipeline
+pandas>=1.5.0
+numpy>=1.21.0
+scikit-learn>=1.0.0
+pyyaml>=6.0
+# RL (discrete action: A2C, PPO)
+gymnasium>=0.29.0
+stable-baselines3>=2.0.0
+# Optional: MLflow for registry
+mlflow>=2.0.0
+# Dashboard
+streamlit>=1.28.0
+# API (optional)
+# fastapi>=0.100.0
+# uvicorn>=0.22.0
